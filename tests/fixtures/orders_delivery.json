@@ -37,8 +37,8 @@
         "apartment": "1",
         "entrance": "1",
         "floor": "1",
-        "latitude": 49.5,
-        "longitude": 34.5,
+        "latitude": 49.5883,
+        "longitude": 34.5514,
         "comment": "",
         "region": null,
         "district": null

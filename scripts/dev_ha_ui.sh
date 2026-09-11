@@ -24,7 +24,29 @@ cmd_up() {
   # 1. свіжий config + symlink інтеграції
   rm -rf "$CFG"; mkdir -p "$CFG/custom_components"
   ln -sfn "$PWD/custom_components/silpo" "$CFG/custom_components/silpo"
-  printf 'default_config:\nlogger:\n  default: warning\n  logs:\n    custom_components.silpo: debug\n' > "$CFG/configuration.yaml"
+  cat > "$CFG/configuration.yaml" <<YAML
+# без default_config, щоб не вантажити bluetooth (крешить на macOS при зупинці)
+homeassistant:
+  name: Дім
+  latitude: 49.588300
+  longitude: 34.551400
+  elevation: 150
+  unit_system: metric
+  time_zone: Europe/Kyiv
+frontend:
+http:
+api:
+config:
+history:
+logbook:
+map:
+person:
+sun:
+logger:
+  default: warning
+  logs:
+    custom_components.silpo: debug
+YAML
   _wait_port_free $PORT_HA >/dev/null || true; _wait_port_free $PORT_MOCK >/dev/null || true
   # 2. mock фоном
   SILPO_E2E_PORT=$PORT_MOCK nohup "$VENV/python" scripts/run_mock.py > "$CFG/mock.log" 2>&1 &
@@ -64,9 +86,12 @@ cmd_status() {
 }
 
 cmd_down() {
+  pkill -TERM -f "hass --config" 2>/dev/null || true
+  pkill -TERM -f "run_mock.py" 2>/dev/null || true
+  for i in $(seq 1 15); do pgrep -f "hass --config" >/dev/null || break; sleep 1; done
   pkill -9 -f "hass --config" 2>/dev/null || true
   pkill -9 -f "run_mock.py" 2>/dev/null || true
-  sleep 2
+  sleep 1
   lsof -ti :$PORT_HA 2>/dev/null | xargs kill -9 2>/dev/null || true
   lsof -ti :$PORT_MOCK 2>/dev/null | xargs kill -9 2>/dev/null || true
   echo "зупинено"
