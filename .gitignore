@@ -25,3 +25,6 @@ config/.storage/
 config/home-assistant.log*
 config/.HA_VERSION
 config/.uuid
+
+# локальний runtime HA (токени, паролі, .storage) — НІКОЛИ в git
+ha_config/
