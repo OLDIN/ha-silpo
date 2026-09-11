@@ -1,8 +1,18 @@
 {
   "config": {
     "step": {
-      "user": { "title": "Silpo — sign in", "data": { "phone": "Phone number" } },
-      "otp": { "title": "SMS code", "data": { "code": "OTP code" } }
+      "user": {
+        "title": "Silpo — sign in",
+        "data": {
+          "phone": "Phone number"
+        }
+      },
+      "otp": {
+        "title": "SMS code",
+        "data": {
+          "code": "OTP code"
+        }
+      }
     },
     "error": {
       "invalid_phone": "Invalid phone format (+380XXXXXXXXX)",
@@ -13,8 +23,17 @@
   },
   "entity": {
     "sensor": {
-      "order_status": { "name": "Silpo order status" },
-      "courier_distance": { "name": "Silpo courier distance" }
+      "order_status": {
+        "name": "Silpo order status"
+      },
+      "courier_distance": {
+        "name": "Silpo courier distance"
+      }
+    },
+    "device_tracker": {
+      "courier": {
+        "name": "Silpo courier"
+      }
     }
   }
 }

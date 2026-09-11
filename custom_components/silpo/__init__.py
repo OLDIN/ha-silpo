@@ -10,7 +10,7 @@ from .api import SilpoAuth, SilpoClient
 from .const import DOMAIN
 from .coordinator import SilpoCoordinator
 
-PLATFORMS = [Platform.SENSOR]
+PLATFORMS = [Platform.SENSOR, Platform.DEVICE_TRACKER]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
