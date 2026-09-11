@@ -20,7 +20,7 @@ from .orders import (
     crossed_thresholds,
     detect_status_change,
     haversine_m,
-    pick_active,
+    select_tracked,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -43,7 +43,8 @@ class SilpoCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self) -> dict:
         orders = await self._client.async_get_orders()
-        active = pick_active(orders)
+        prev_id = self._prev_active.get("orderId") if self._prev_active else None
+        active = select_tracked(orders, prev_id)
 
         # відстань до кур'єра (лише під час доставки)
         distance = None

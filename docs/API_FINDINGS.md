@@ -65,3 +65,13 @@
 - активне замовлення: <ORDER_ID> / <ORDER_NUMBER>
 - courierId: <COURIER_ID>
 - companyId: 1ec88c5d-a050-669c-8467-570a157f3e31
+
+## Живий цикл доставки (захоплено 2026-09-11, повний прогін)
+Послідовність РЕАЛЬНИХ переходів одного замовлення:
+    17:17  collected -> delivery_in_progress   (agg: compiling -> delivery)   "кур'єр виїхав"
+    18:04:31  deliveredAt проставлено, АЛЕ status ще delivery_in_progress
+    18:05:53  status -> received (agg -> done), completedAt проставлено   "доставлено"
+
+ВАЖЛИВО: `delivery.deliveredAt != null` з'являється РАНІШЕ (~1.5 хв) за status=received.
+→ Для точнішого сигналу «доставлено» можна орієнтуватись на deliveredAt, не лише на статус.
+→ completedAt проставляється разом зі статусом received (фінал).

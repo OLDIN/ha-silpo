@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Запуск СПРАВЖНЬОГО Home Assistant з цією інтеграцією (для ручної перевірки в UI).
+set -e
+cd "$(dirname "$0")/.."
+if [[ ! -d "config" ]]; then
+    mkdir -p config
+    .venv-ha/bin/hass --config config --script ensure_config
+fi
+export PYTHONPATH="${PYTHONPATH}:${PWD}/custom_components"
+.venv-ha/bin/hass --config config --debug

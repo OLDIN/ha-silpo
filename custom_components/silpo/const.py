@@ -1,12 +1,14 @@
 """Константи інтеграції Silpo."""
 from __future__ import annotations
 
+import os
+
 DOMAIN = "silpo"
 
 # API endpoints
-AUTH_BASE = "https://auth.silpo.ua"
-ECOM_BASE = "https://ecom-api.silpo.ua"
-CITYRYDER_BASE = "https://cityryder-public-api.silpo.ua"
+AUTH_BASE = os.getenv("SILPO_AUTH_BASE", "https://auth.silpo.ua")
+ECOM_BASE = os.getenv("SILPO_ECOM_BASE", "https://ecom-api.silpo.ua")
+CITYRYDER_BASE = os.getenv("SILPO_CITYRYDER_BASE", "https://cityryder-public-api.silpo.ua")
 ORDERS_PATH = "/v3/store-front/orders"
 COURIER_LOCATION_PATH = "/v1/couriers/{courier_id}/location"
 

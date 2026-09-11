@@ -76,3 +76,25 @@ def test_crossed_thresholds_moving_away_none():
 def test_crossed_thresholds_no_previous():
     """Перший замір (prev=None) не тригерить пороги."""
     assert crossed_thresholds(None, 150, (1000, 500, 200)) == []
+
+
+from custom_components.silpo.orders import select_tracked
+
+
+def test_select_tracked_prefers_active(order_collected, order_received):
+    """Є активне -> відстежуємо його."""
+    tracked = select_tracked([order_received, order_collected], prev_id=None)
+    assert tracked["status"] == "collected"
+
+
+def test_select_tracked_keeps_finished_order_by_id(order_received):
+    """Активного нема, але відстежуване щойно стало received -> тримаємо його,
+    щоб спіймати фінальний перехід (подію 'доставлено')."""
+    tracked = select_tracked([order_received], prev_id=order_received["orderId"])
+    assert tracked is not None
+    assert tracked["status"] == "received"
+
+
+def test_select_tracked_none_when_no_active_and_unknown_prev(order_received):
+    """Активного нема і prev невідомий -> None (нічого не відстежуємо)."""
+    assert select_tracked([order_received], prev_id="some-other-id") is None

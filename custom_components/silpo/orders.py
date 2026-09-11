@@ -56,3 +56,21 @@ def crossed_thresholds(
     if prev_dist is None or curr_dist is None:
         return []
     return [t for t in sorted(thresholds, reverse=True) if prev_dist > t >= curr_dist]
+
+
+def select_tracked(orders: list[dict], prev_id: str | None) -> dict | None:
+    """Замовлення для відстеження.
+
+    Пріоритет — активне замовлення. Якщо активних немає, але серед замовлень
+    є те, що ми відстежували (prev_id) і воно щойно завершилось (received/
+    returned/canceled) — повертаємо його, щоб спіймати фінальний перехід
+    (подію «доставлено»). Інакше None.
+    """
+    active = pick_active(orders)
+    if active is not None:
+        return active
+    if prev_id is not None:
+        for order in orders:
+            if order.get("orderId") == prev_id:
+                return order
+    return None
