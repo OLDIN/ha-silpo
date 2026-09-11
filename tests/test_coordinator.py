@@ -60,9 +60,13 @@ async def test_proximity_event_on_threshold_cross(
     hass, order_delivery, courier_location
 ):
     """Кур'єр перетинає поріг наближення -> silpo_courier_proximity."""
-    # courier_location ~900 м від дому (49.5,34.5); стартуємо далеко (>1000)
-    far = {**courier_location, "latitude": 49.52}   # ~2.2 км
-    near = {**courier_location, "latitude": 49.508}  # ~900 м
+    # координати кур'єра відносно адреси замовлення (стійко до зміни фікстур):
+    # ~0.02° ≈ 2.2 км (далеко), ~0.008° ≈ 900 м (близько)
+    addr = order_delivery["address"]
+    far = {**courier_location, "latitude": addr["latitude"] + 0.02,
+           "longitude": addr["longitude"]}
+    near = {**courier_location, "latitude": addr["latitude"] + 0.008,
+            "longitude": addr["longitude"]}
     client = FakeClient([[order_delivery], [order_delivery]], location=far)
     coordinator = SilpoCoordinator(hass, client, options={})
     events = async_capture_events(hass, EVENT_COURIER_PROXIMITY)
