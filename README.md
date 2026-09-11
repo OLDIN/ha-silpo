@@ -8,6 +8,7 @@ Home Assistant при зміні статусу доставки** — щоб о
 - 🚚 **Сенсор статусу замовлення** — `sensor.silpo_order_status`
   (`new` → `collecting` → `collected` → `delivery_in_progress` → `received`).
 - 📍 **Сенсор відстані кур'єра** — `sensor.silpo_courier_distance` (метри до вашої адреси, під час доставки).
+- 🗺️ **Кур'єр на карті** — `device_tracker.silpo_courier` (GPS-позиція на стандартній карті HA).
 - 🔔 **Події на шині HA** для автоматизацій:
   - `silpo_order_status_changed` — `{order_number, old_status, new_status, ...}`.
     **«Кур'єр виїхав» = `new_status: delivery_in_progress`**; «доставлено» = `received`.
@@ -64,6 +65,13 @@ python3 -m venv .venv-ha
 scripts/run_tests.sh      # unit + E2E
 scripts/run_e2e.sh        # лише E2E (справжнє HA-ядро + mock Silpo)
 scripts/develop           # запустити справжній HA UI з інтеграцією (порт 8123)
+
+# Автоматичний UI-харнес: піднімає СПРАВЖНІЙ HA (без Docker) + mock Сільпо,
+# сам проходить onboarding і встановлює інтеграцію. Демонстрація переходів:
+scripts/dev_ha_ui.sh up                          # підняти HA на :8123 (admin/silpo1234)
+scripts/dev_ha_ui.sh status delivery_in_progress # 'кур'\''єр виїхав' — сенсори+трекер оновляться
+scripts/dev_ha_ui.sh status received             # 'доставлено'
+scripts/dev_ha_ui.sh down                        # зупинити
 ```
 
 Технічні деталі API — `docs/API_FINDINGS.md`. Дизайн — `docs/superpowers/specs/`.
