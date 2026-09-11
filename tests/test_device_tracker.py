@@ -48,3 +48,12 @@ async def test_courier_tracker_no_coords_without_delivery(
     state = hass.states.get("device_tracker.silpo_courier")
     assert state is not None
     assert state.attributes.get("latitude") is None
+
+
+async def test_courier_tracker_has_truck_picture(hass, order_delivery, courier_location):
+    """Маркер кур'єра на карті — картинка вантажівки (entity_picture), не текст."""
+    await _setup(hass, [order_delivery], courier_location)
+
+    state = hass.states.get("device_tracker.silpo_courier")
+    pic = state.attributes.get("entity_picture", "")
+    assert pic.startswith("data:image/svg+xml"), f"очікували SVG-картинку, маємо: {pic[:40]}"

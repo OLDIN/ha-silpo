@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
+from .const import COURIER_PICTURE, DOMAIN
 
 
 async def async_setup_entry(
@@ -32,6 +32,10 @@ class SilpoCourierTracker(CoordinatorEntity, TrackerEntity):
 
     def _loc(self) -> dict:
         return (self.coordinator.data or {}).get("location") or {}
+
+    @property
+    def entity_picture(self) -> str:
+        return COURIER_PICTURE
 
     @property
     def source_type(self) -> SourceType:
