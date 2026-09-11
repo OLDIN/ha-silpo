@@ -72,3 +72,53 @@ async def test_proximity_event_on_threshold_cross(
     await coordinator._async_update_data()          # перетнув 1000
 
     assert any(e.data["threshold_m"] == 1000 for e in events)
+
+
+from custom_components.silpo.api import SilpoAuthError
+
+
+class FakeAuth:
+    """Підставний auth: рефреш повертає нові токени."""
+
+    def __init__(self):
+        self.refresh_calls = 0
+
+    async def async_refresh(self, refresh_token):
+        self.refresh_calls += 1
+        return {"access_token": "new-acc", "refresh_token": "new-ref", "expires_in": 10800}
+
+
+class FlakyClient:
+    """Перший get_orders кидає 401, після set_token — віддає замовлення."""
+
+    def __init__(self, order):
+        self._order = order
+        self._token_ok = False
+        self.tokens_set = []
+
+    def set_token(self, token):
+        self._token_ok = True
+        self.tokens_set.append(token)
+
+    async def async_get_orders(self):
+        if not self._token_ok:
+            raise SilpoAuthError("401")
+        return [self._order]
+
+    async def async_get_courier_location(self, courier_id):
+        return None
+
+
+async def test_coordinator_refreshes_token_on_auth_error(hass, order_collected):
+    """При 401 координатор рефрешить токен і повторює запит успішно."""
+    client = FlakyClient(order_collected)
+    auth = FakeAuth()
+    coordinator = SilpoCoordinator(
+        hass, client, options={}, auth=auth, refresh_token="ref"
+    )
+
+    data = await coordinator._async_update_data()
+
+    assert auth.refresh_calls == 1
+    assert client.tokens_set == ["new-acc"]
+    assert data["active"]["status"] == "collected"

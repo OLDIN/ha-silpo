@@ -39,6 +39,10 @@ class SilpoClient:
         self._session = session
         self._token = token
 
+    def set_token(self, token: str) -> None:
+        """Оновити access-токен (після рефрешу)."""
+        self._token = token
+
     def _headers(self) -> dict[str, str]:
         return {**_BROWSER_HEADERS, "Authorization": f"Bearer {self._token}"}
 
