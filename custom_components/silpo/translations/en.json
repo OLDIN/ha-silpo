@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": { "title": "Silpo — sign in", "data": { "phone": "Phone number" } },
+      "otp": { "title": "SMS code", "data": { "code": "OTP code" } }
+    },
+    "error": {
+      "invalid_phone": "Invalid phone format (+380XXXXXXXXX)",
+      "invalid_code": "Code must be 6 digits",
+      "invalid_auth": "Invalid or expired code",
+      "cannot_connect": "Cannot connect to Silpo"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "order_status": { "name": "Silpo order status" },
+      "courier_distance": { "name": "Silpo courier distance" }
+    }
+  }
+}

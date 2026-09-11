@@ -1,0 +1,29 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Silpo — вхід",
+        "description": "Введіть номер телефону у форматі +380XXXXXXXXX. На нього надійде SMS з кодом.",
+        "data": { "phone": "Номер телефону" }
+      },
+      "otp": {
+        "title": "Код з SMS",
+        "description": "Введіть 6-значний код підтвердження.",
+        "data": { "code": "OTP код" }
+      }
+    },
+    "error": {
+      "invalid_phone": "Невірний формат телефону (потрібно +380XXXXXXXXX)",
+      "invalid_code": "Код має містити 6 цифр",
+      "invalid_auth": "Невірний код або він протух",
+      "cannot_connect": "Не вдалося з'єднатися з Сільпо"
+    },
+    "abort": { "already_configured": "Цей акаунт вже додано" }
+  },
+  "entity": {
+    "sensor": {
+      "order_status": { "name": "Статус замовлення Silpo" },
+      "courier_distance": { "name": "Відстань кур'єра Silpo" }
+    }
+  }
+}
