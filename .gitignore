@@ -1,0 +1,27 @@
+# venvs
+.venv
+.venv/
+.venv-ha/
+venv/
+
+# робочі дані розвідки — містять PII (адреса/телефон/картка/координати).
+# ЛИШЕ локально, ніколи в git.
+captures/
+
+# secrets
+*.token.json
+.silpo_auth.json
+.ls_dump.json
+
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# HA runtime
+config/.storage/
+config/home-assistant.log*
+config/.HA_VERSION
+config/.uuid

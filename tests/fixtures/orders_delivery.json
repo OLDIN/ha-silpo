@@ -1,0 +1,77 @@
+{
+  "limit": 10,
+  "offset": 0,
+  "total": 1,
+  "items": [
+    {
+      "orderId": "00000000-0000-0000-0000-0000000000aa",
+      "number": "10000001",
+      "status": "delivery_in_progress",
+      "branchId": "1edb7351-8383-658a-a450-d5cf071d641d",
+      "guest": {
+        "guestId": "00000000-0000-0000-0000-000000000001",
+        "phone": "+380500000000",
+        "email": null,
+        "lastName": null,
+        "firstName": null
+      },
+      "delivery": {
+        "type": "DeliveryHome",
+        "cost": 1,
+        "code": null,
+        "surcharge": 0,
+        "surchargeCode": null,
+        "timeSlot": {
+          "from": "2026-09-11T17:00:00+00:00",
+          "to": "2026-09-11T18:30:00+00:00"
+        },
+        "deliveredAt": null,
+        "courierId": "00000000-0000-0000-0000-0000000000cc"
+      },
+      "address": {
+        "type": "apartment",
+        "city": "Тестомісто",
+        "street": "вулиця Тестова",
+        "building": "1",
+        "house": null,
+        "apartment": "1",
+        "entrance": "1",
+        "floor": "1",
+        "latitude": 49.5,
+        "longitude": 34.5,
+        "comment": "",
+        "region": null,
+        "district": null
+      },
+      "payment": {
+        "status": "paid",
+        "type": "ApplePay",
+        "cardNumber": "0000****0000"
+      },
+      "amount": 1957.96,
+      "initialAmount": 2028.64,
+      "discount": 344.22,
+      "comment": "",
+      "shipments": [
+        {
+          "id": "ship-0"
+        }
+      ],
+      "fiscalReceipts": [],
+      "createdAt": "2026-09-11T14:34:18+00:00",
+      "processingStartedAt": "2026-09-11T14:34:18+00:00",
+      "updatedAt": "2026-09-11T17:17:07+00:00",
+      "completedAt": null,
+      "business": "silpo",
+      "source": "order-service",
+      "totalWeight": 13.6,
+      "totalWithoutDiscount": 2012.85,
+      "totalProductsWithoutDiscount": 2011.85,
+      "authorized": true,
+      "collectingFee": 0,
+      "meta": null,
+      "guestCompanyId": null,
+      "aggregatedShipmentStatus": "delivery"
+    }
+  ]
+}

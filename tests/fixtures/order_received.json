@@ -1,0 +1,70 @@
+{
+  "orderId": "00000000-0000-0000-0000-0000000000aa",
+  "number": "10000001",
+  "status": "received",
+  "branchId": "1edb7351-8383-658a-a450-d5cf071d641d",
+  "guest": {
+    "guestId": "00000000-0000-0000-0000-000000000001",
+    "phone": "+380500000000",
+    "email": null,
+    "lastName": null,
+    "firstName": null
+  },
+  "delivery": {
+    "type": "DeliveryHome",
+    "cost": 1,
+    "code": null,
+    "surcharge": 0,
+    "surchargeCode": null,
+    "timeSlot": {
+      "from": "2026-09-05T17:00:00+00:00",
+      "to": "2026-09-05T18:30:00+00:00"
+    },
+    "deliveredAt": "2026-09-05T17:23:30+00:00",
+    "courierId": "00000000-0000-0000-0000-0000000000cc"
+  },
+  "address": {
+    "type": "apartment",
+    "city": "Тестомісто",
+    "street": "вулиця Тестова",
+    "building": "1",
+    "house": null,
+    "apartment": "1",
+    "entrance": "1",
+    "floor": "1",
+    "latitude": 49.5,
+    "longitude": 34.5,
+    "comment": "",
+    "region": null,
+    "district": null
+  },
+  "payment": {
+    "status": "paid",
+    "type": "ApplePay",
+    "cardNumber": "0000****0000"
+  },
+  "amount": 2380.95,
+  "initialAmount": 2565.75,
+  "discount": 355.92,
+  "comment": "",
+  "shipments": [
+    {
+      "id": "ship-0"
+    }
+  ],
+  "fiscalReceipts": [],
+  "createdAt": "2026-09-05T15:27:29+00:00",
+  "processingStartedAt": "2026-09-05T15:27:29+00:00",
+  "updatedAt": "2026-09-05T17:25:56+00:00",
+  "completedAt": "2026-09-05T17:25:56+00:00",
+  "business": "silpo",
+  "source": "order-service",
+  "totalWeight": 12.52,
+  "totalWithoutDiscount": 2531.17,
+  "totalProductsWithoutDiscount": 2530.17,
+  "authorized": true,
+  "collectingFee": 0,
+  "meta": null,
+  "guestCompanyId": null,
+  "aggregatedShipmentStatus": "done"
+}
