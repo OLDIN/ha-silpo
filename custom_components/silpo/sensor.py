@@ -84,9 +84,7 @@ class SilpoCourierDistanceSensor(_Base, SensorEntity):
 
     @property
     def extra_state_attributes(self) -> dict:
+        # без latitude/longitude — інакше HA намалює цей сенсор окремим маркером
+        # на карті (координати кур'єра показує device_tracker.silpo_courier).
         loc = (self.coordinator.data or {}).get("location") or {}
-        return {
-            "latitude": loc.get("latitude"),
-            "longitude": loc.get("longitude"),
-            "courier_updated_at": loc.get("updatedAt"),
-        }
+        return {"courier_updated_at": loc.get("updatedAt")}

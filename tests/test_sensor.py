@@ -49,3 +49,12 @@ async def test_distance_sensor_has_value_during_delivery(
     state = hass.states.get("sensor.silpo_courier_distance")
     assert state is not None
     assert float(state.state) > 0
+
+
+async def test_distance_sensor_not_on_map(hass, order_delivery, courier_location):
+    """Сенсор відстані не має lat/lon в атрибутах (щоб не дублювати маркер на карті)."""
+    await _setup(hass, [order_delivery], courier_location)
+
+    state = hass.states.get("sensor.silpo_courier_distance")
+    assert "latitude" not in state.attributes
+    assert "longitude" not in state.attributes
