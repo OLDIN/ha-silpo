@@ -25,10 +25,29 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
         await hass.http.async_register_static_paths(
             [StaticPathConfig("/silpo_static", www, False)]
         )
-        add_extra_js_url(hass, "/silpo_static/silpo-order-card.js")
+        await _async_register_card_resource(hass)
     except Exception:  # noqa: BLE001 — http/frontend недоступні (напр. у тестах)
         pass
     return True
+
+
+async def _async_register_card_resource(hass: HomeAssistant) -> None:
+    """Надійно зареєструвати картку як lovelace-ресурс (storage-режим).
+
+    Один канал завантаження замість add_extra_js_url — уникає race при рендері.
+    """
+    url = "/silpo_static/silpo-order-card.js"
+    lovelace = hass.data.get("lovelace")
+    resources = getattr(lovelace, "resources", None) if lovelace else None
+    if resources is None:
+        return
+    if not resources.loaded:
+        await resources.async_load()
+        resources.loaded = True
+    # не дублювати, якщо вже зареєстровано
+    if any(r.get("url") == url for r in resources.async_items()):
+        return
+    await resources.async_create_item({"res_type": "module", "url": url})
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

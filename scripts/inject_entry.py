@@ -22,26 +22,31 @@ p.write_text(json.dumps(d, indent=2))
 print("silpo entry інжектовано")
 
 
-# --- дашборд Lovelace з карткою Silpo (для UI-демо) ---
-lovelace = {
-    "version": 1, "key": "lovelace.lovelace", "data": {"config": {"views": [{
-        "title": "Silpo", "path": "silpo", "icon": "mdi:cart",
-        "cards": [
-            {"type": "custom:silpo-order-card",
-             "entity": "sensor.silpo_order_status",
-             "eta_entity": "sensor.silpo_courier_eta",
-             "distance_entity": "sensor.silpo_courier_distance"},
-            {"type": "map", "entities": [
-                "device_tracker.silpo_courier", "zone.home"], "hours_to_show": 0},
-            {"type": "entities", "title": "Деталі", "entities": [
-                "sensor.silpo_order_status",
-                "sensor.silpo_courier_distance",
-                "sensor.silpo_courier_eta"]},
-        ]}]}}}
-(cfg / ".storage" / "lovelace.lovelace").write_text(json.dumps(lovelace, ensure_ascii=False, indent=2))
+# --- окремий dashboard "Silpo" у бічному меню ---
+storage = cfg / ".storage"
+cards = [
+    {"type": "custom:silpo-order-card",
+     "entity": "sensor.silpo_order_status",
+     "eta_entity": "sensor.silpo_courier_eta",
+     "distance_entity": "sensor.silpo_courier_distance"},
+    {"type": "map", "entities": ["device_tracker.silpo_courier", "zone.home"], "hours_to_show": 0},
+    {"type": "entities", "title": "Деталі", "entities": [
+        "sensor.silpo_order_status", "sensor.silpo_courier_distance", "sensor.silpo_courier_eta"]},
+]
+(storage / "lovelace.silpo").write_text(json.dumps(
+    {"version": 1, "key": "lovelace.silpo",
+     "data": {"config": {"title": "Silpo", "views": [
+         {"title": "Silpo", "path": "silpo", "cards": cards}]}}},
+    ensure_ascii=False, indent=2))
 
-# канонічна реєстрація ресурсу картки (для storage-режиму)
-resources = {"version": 1, "key": "lovelace_resources", "data": {"items": [
-    {"id": "silpo_card", "type": "module", "url": "/silpo_static/silpo-order-card.js"}]}}
-(cfg / ".storage" / "lovelace_resources").write_text(json.dumps(resources, ensure_ascii=False, indent=2))
-print("lovelace dashboard + resource картки Silpo записано")
+# зареєструвати dashboard у sidebar (зберегти існуючі, напр. Map)
+dpath = storage / "lovelace_dashboards"
+dashboards = json.loads(dpath.read_text()) if dpath.exists() else {
+    "version": 1, "key": "lovelace_dashboards", "data": {"items": []}}
+items = [d for d in dashboards["data"]["items"] if d.get("id") != "silpo"]
+items.append({"id": "silpo", "icon": "mdi:cart", "title": "Silpo",
+              "url_path": "silpo", "show_in_sidebar": True,
+              "mode": "storage", "require_admin": False})
+dashboards["data"]["items"] = items
+dpath.write_text(json.dumps(dashboards, ensure_ascii=False, indent=2))
+print("окремий dashboard Silpo у sidebar записано (ресурс реєструє сама інтеграція)")
