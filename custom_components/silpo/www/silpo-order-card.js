@@ -57,6 +57,19 @@ class SilpoOrderCard extends HTMLElement {
 
     if (!this.card) { this.card = document.createElement("ha-card"); this.appendChild(this.card); }
 
+    // Немає активного замовлення (unknown/unavailable/порожньо) — empty state
+    const known = STEPS.some((s) => s.key === status) || FINAL_BAD[status];
+    if (!known) {
+      this.card.innerHTML = `
+        <div style="padding:32px 16px;text-align:center;color:var(--secondary-text-color,#888);">
+          <svg viewBox="0 0 24 24" style="width:40px;height:40px;fill:var(--divider-color,#cfcfcf);">
+            <path d="${ICONS.cart}"/></svg>
+          <div style="margin-top:10px;font-size:15px;font-weight:600;">Немає активних замовлень</div>
+          <div style="margin-top:4px;font-size:12px;">Тут з'явиться статус, коли оформите доставку в Сільпо</div>
+        </div>`;
+      return;
+    }
+
     let activeIdx = STEPS.findIndex((s) => s.key === status);
     const bad = FINAL_BAD[status];
     if (bad) activeIdx = -1;
