@@ -13,6 +13,24 @@ from .coordinator import SilpoCoordinator
 PLATFORMS = [Platform.SENSOR, Platform.DEVICE_TRACKER]
 
 
+async def async_setup(hass: HomeAssistant, config: dict) -> bool:
+    """Зареєструвати статику й авто-підключити Lovelace-картку."""
+    import os
+
+    from homeassistant.components.frontend import add_extra_js_url
+    from homeassistant.components.http import StaticPathConfig
+
+    www = os.path.join(os.path.dirname(__file__), "www")
+    try:
+        await hass.http.async_register_static_paths(
+            [StaticPathConfig("/silpo_static", www, False)]
+        )
+        add_extra_js_url(hass, "/silpo_static/silpo-order-card.js")
+    except Exception:  # noqa: BLE001 — http/frontend недоступні (напр. у тестах)
+        pass
+    return True
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Підняти інтеграцію: клієнт, координатор, платформи."""
     session = async_get_clientsession(hass)

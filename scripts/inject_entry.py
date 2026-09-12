@@ -20,3 +20,23 @@ entries.append(tmpl)
 d["data"]["entries"] = entries
 p.write_text(json.dumps(d, indent=2))
 print("silpo entry інжектовано")
+
+
+# --- дашборд Lovelace з карткою Silpo (для UI-демо) ---
+lovelace = {
+    "version": 1, "key": "lovelace", "data": {"config": {"views": [{
+        "title": "Silpo", "path": "silpo", "icon": "mdi:cart",
+        "cards": [
+            {"type": "custom:silpo-order-card",
+             "entity": "sensor.silpo_order_status",
+             "eta_entity": "sensor.silpo_courier_eta",
+             "distance_entity": "sensor.silpo_courier_distance"},
+            {"type": "map", "entities": [
+                "device_tracker.silpo_courier", "zone.home"], "hours_to_show": 0},
+            {"type": "entities", "title": "Деталі", "entities": [
+                "sensor.silpo_order_status",
+                "sensor.silpo_courier_distance",
+                "sensor.silpo_courier_eta"]},
+        ]}]}}}
+(cfg / ".storage" / "lovelace").write_text(json.dumps(lovelace, ensure_ascii=False, indent=2))
+print("lovelace dashboard з карткою Silpo записано")
