@@ -28,6 +28,11 @@ const FINAL_BAD = { returned: "Замовлення повернено", cancele
 const svgIcon = (path, color) =>
   `<svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:${color};"><path d="${path}"/></svg>`;
 
+// Екранування значень з API/сенсорів перед вставкою в innerHTML (захист від XSS).
+const esc = (v) =>
+  v == null ? "" : String(v).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
 class SilpoOrderCard extends HTMLElement {
   setConfig(config) {
     if (!config.entity) throw new Error("Вкажіть entity: sensor.silpo_order_status");
@@ -83,13 +88,13 @@ class SilpoOrderCard extends HTMLElement {
 
     const badges = [];
     if (status === "delivery_in_progress") {
-      if (eta && eta !== "unknown") badges.push(`⏱️ ~${eta} хв`);
-      if (distKm) badges.push(`📍 ${distKm} км`);
-      else if (distM && distM !== "unknown") badges.push(`📍 ${Math.round(distM)} м`);
+      if (eta && eta !== "unknown") badges.push(`⏱️ ~${esc(eta)} хв`);
+      if (distKm) badges.push(`📍 ${esc(distKm)} км`);
+      else if (distM && distM !== "unknown") badges.push(`📍 ${esc(Math.round(distM))} м`);
     }
-    if (slot) badges.push(`🕐 ${slot}`);
+    if (slot) badges.push(`🕐 ${esc(slot)}`);
 
-    const header = number ? `Замовлення №${number}` : "Замовлення Сільпо";
+    const header = number ? `Замовлення №${esc(number)}` : "Замовлення Сільпо";
     const sub = status === "delivery_in_progress"
       ? `<span style="font-size:12px;color:${PINK};font-weight:600;">кур'єр у дорозі 🚚</span>`
       : status === "received"

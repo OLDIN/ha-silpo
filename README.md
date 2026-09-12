@@ -205,7 +205,34 @@ automation:
 
 ---
 
-## Картки Lovelace
+## Картка статусу (степер)
+
+Інтеграція постачає власну картку **Silpo Order Card** — горизонтальний степер
+доставки (Нове → Збираємо → Зібрано → У дорозі → Доставлено) з іконками, лінією,
+що заповнюється, ETA й відстанню.
+
+Вона **реєструється автоматично**: після встановлення інтеграції та перезапуску HA
+картка з'являється у списку **Редагувати дашборд → Додати картку → «Silpo Order Card»**.
+Додавати ресурс вручну не потрібно.
+
+```yaml
+type: custom:silpo-order-card
+entity: sensor.silpo_order_status
+eta_entity: sensor.silpo_courier_eta
+distance_entity: sensor.silpo_courier_distance
+```
+
+> **Дашборд у YAML-режимі?** Якщо ви свідомо ввімкнули `lovelace: mode: yaml`, HA не
+> підхоплює ресурси автоматично — додайте картку в ресурси один раз:
+> ```yaml
+> lovelace:
+>   resources:
+>     - url: /silpo_static/silpo-order-card.js
+>       type: module
+> ```
+> У стандартному (storage) режимі це не потрібно.
+
+## Інші картки Lovelace
 
 **Кур'єр на карті** (стандартна картка Map):
 
