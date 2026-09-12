@@ -24,7 +24,7 @@ print("silpo entry інжектовано")
 
 # --- дашборд Lovelace з карткою Silpo (для UI-демо) ---
 lovelace = {
-    "version": 1, "key": "lovelace", "data": {"config": {"views": [{
+    "version": 1, "key": "lovelace.lovelace", "data": {"config": {"views": [{
         "title": "Silpo", "path": "silpo", "icon": "mdi:cart",
         "cards": [
             {"type": "custom:silpo-order-card",
@@ -38,5 +38,10 @@ lovelace = {
                 "sensor.silpo_courier_distance",
                 "sensor.silpo_courier_eta"]},
         ]}]}}}
-(cfg / ".storage" / "lovelace").write_text(json.dumps(lovelace, ensure_ascii=False, indent=2))
-print("lovelace dashboard з карткою Silpo записано")
+(cfg / ".storage" / "lovelace.lovelace").write_text(json.dumps(lovelace, ensure_ascii=False, indent=2))
+
+# канонічна реєстрація ресурсу картки (для storage-режиму)
+resources = {"version": 1, "key": "lovelace_resources", "data": {"items": [
+    {"id": "silpo_card", "type": "module", "url": "/silpo_static/silpo-order-card.js"}]}}
+(cfg / ".storage" / "lovelace_resources").write_text(json.dumps(resources, ensure_ascii=False, indent=2))
+print("lovelace dashboard + resource картки Silpo записано")

@@ -139,8 +139,10 @@ class SilpoOrderCard extends HTMLElement {
   }
 }
 
-customElements.define("silpo-order-card", SilpoOrderCard);
-window.customCards = window.customCards || [];
-window.customCards.push({ type: "silpo-order-card", name: "Silpo Order Card",
-  description: "Степер статусу доставки замовлення Сільпо" });
-console.info("%c SILPO-ORDER-CARD %c завантажено", "background:#e6007e;color:#fff;border-radius:3px", "");
+if (!customElements.get("silpo-order-card")) {
+  customElements.define("silpo-order-card", SilpoOrderCard);
+  window.customCards = window.customCards || [];
+  window.customCards.push({ type: "silpo-order-card", name: "Silpo Order Card",
+    description: "Степер статусу доставки замовлення Сільпо" });
+  console.info("%c SILPO-ORDER-CARD %c завантажено", "background:#e6007e;color:#fff;border-radius:3px", "");
+}
