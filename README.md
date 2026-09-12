@@ -14,7 +14,8 @@
 ## Можливості
 
 - 🚚 **Статус замовлення** — сенсор із поточним станом доставки.
-- 📍 **Відстань кур'єра** — скільки метрів лишилось до вашої адреси.
+- 📍 **Відстань кур'єра по дорогах** — реальна відстань маршрутом (через Waze), не по прямій.
+- ⏱️ **Час прибуття (ETA)** — скільки хвилин їхати кур'єру (через Waze, безкоштовно, без ключа).
 - 🗺️ **Кур'єр на карті** — рухома позначка-вантажівка на стандартній карті HA.
 - 🔔 **Події** для автоматизацій: зміна статусу та перетин порогів наближення.
 - 🔐 **Авторизація OTP** (через SMS), автоматичне оновлення токена без повторного входу.
@@ -69,8 +70,14 @@ HA покаже сповіщення «Потрібна повторна авт�
 | Сутність | Тип | Опис |
 |---|---|---|
 | `sensor.silpo_order_status` | sensor | Поточний статус активного замовлення |
-| `sensor.silpo_courier_distance` | sensor (distance, м) | Відстань кур'єра до адреси доставки (лише під час доставки) |
+| `sensor.silpo_courier_distance` | sensor (distance, м) | Відстань по дорогах до адреси (Waze; fallback — по прямій) |
+| `sensor.silpo_courier_eta` | sensor (min) | Орієнтовний час прибуття кур'єра по дорогах (Waze) |
 | `device_tracker.silpo_courier` | device_tracker | Позиція кур'єра на карті (лише під час доставки) |
+
+> **Відстань і час — по дорогах.** `sensor.silpo_courier_distance` і `sensor.silpo_courier_eta`
+> рахуються через **Waze** (реальний маршрут вулицями, безкоштовно, без API-ключа) — не по
+> прямій. Якщо Waze тимчасово недоступний, відстань падає на розрахунок по прямій (гаверсинус),
+> а ETA стає порожнім.
 
 ### `sensor.silpo_order_status`
 
@@ -87,8 +94,13 @@ HA покаже сповіщення «Потрібна повторна авт�
 
 ### `sensor.silpo_courier_distance`
 
-Стан = відстань у метрах (device_class `distance`). Поза доставкою — `unknown`.
-Атрибут `courier_updated_at` — час останнього оновлення координат кур'єром.
+Стан = відстань у метрах **по дорогах** (Waze; device_class `distance`). Поза доставкою — `unknown`.
+Атрибути: `distance_km` (км по дорогах), `courier_updated_at`.
+
+### `sensor.silpo_courier_eta`
+
+Стан = **хвилини до прибуття** кур'єра по дорогах (Waze). Поза доставкою або коли Waze
+недоступний — `unknown`. Атрибут `distance_km`.
 
 ### `device_tracker.silpo_courier`
 
@@ -214,7 +226,26 @@ entities:
   - entity: sensor.silpo_order_status
     name: Статус
   - entity: sensor.silpo_courier_distance
-    name: Відстань кур'єра
+    name: Відстань кур'єра (по дорогах)
+  - entity: sensor.silpo_courier_eta
+    name: Час прибуття
+```
+
+**Автоматизація по ETA** (озвучити «кур'єр за 5 хвилин»):
+
+```yaml
+automation:
+  - alias: "Silpo: кур'єр за 5 хвилин"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.silpo_courier_eta
+        below: 6
+    action:
+      - service: tts.speak
+        target: { entity_id: media_player.kitchen }
+        data:
+          media_player_entity_id: media_player.kitchen
+          message: "Кур'єр Сільпо прибуде приблизно за 5 хвилин"
 ```
 
 **Умовна картка** (показувати лише під час доставки):

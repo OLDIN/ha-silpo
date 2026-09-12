@@ -126,3 +126,20 @@ async def test_coordinator_refreshes_token_on_auth_error(hass, order_collected):
     assert auth.refresh_calls == 1
     assert client.tokens_set == ["new-acc"]
     assert data["active"]["status"] == "collected"
+
+
+async def test_coordinator_uses_waze_route(hass, order_delivery, courier_location):
+    """Коли Waze доступний — distance по дорогах + ETA у даних координатора."""
+    from unittest.mock import AsyncMock, patch
+
+    client = FakeClient([[order_delivery]], location=courier_location)
+    coordinator = SilpoCoordinator(hass, client, options={})
+    with patch(
+        "custom_components.silpo.coordinator.async_get_route",
+        new=AsyncMock(return_value={"distance_km": 3.4, "distance_m": 3400, "duration_min": 13}),
+    ):
+        data = await coordinator._async_update_data()
+
+    assert data["distance_m"] == 3400
+    assert data["eta_min"] == 13
+    assert data["distance_km"] == 3.4

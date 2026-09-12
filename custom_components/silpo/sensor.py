@@ -20,6 +20,7 @@ async def async_setup_entry(
         [
             SilpoOrderStatusSensor(coordinator, entry),
             SilpoCourierDistanceSensor(coordinator, entry),
+            SilpoCourierEtaSensor(coordinator, entry),
         ]
     )
 
@@ -86,5 +87,31 @@ class SilpoCourierDistanceSensor(_Base, SensorEntity):
     def extra_state_attributes(self) -> dict:
         # без latitude/longitude — інакше HA намалює цей сенсор окремим маркером
         # на карті (координати кур'єра показує device_tracker.silpo_courier).
-        loc = (self.coordinator.data or {}).get("location") or {}
-        return {"courier_updated_at": loc.get("updatedAt")}
+        data = self.coordinator.data or {}
+        loc = data.get("location") or {}
+        return {
+            "distance_km": data.get("distance_km"),
+            "courier_updated_at": loc.get("updatedAt"),
+        }
+
+
+class SilpoCourierEtaSensor(_Base, SensorEntity):
+    """Орієнтовний час прибуття кур'єра по дорогах (хвилини, з Waze)."""
+
+    _attr_translation_key = "courier_eta"
+    _attr_icon = "mdi:clock-outline"
+    _attr_native_unit_of_measurement = "min"
+
+    def __init__(self, coordinator, entry) -> None:
+        super().__init__(coordinator, entry)
+        self._attr_unique_id = f"{entry.entry_id}_courier_eta"
+        self._attr_name = "Silpo courier ETA"
+
+    @property
+    def native_value(self) -> int | None:
+        return (self.coordinator.data or {}).get("eta_min")
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        data = self.coordinator.data or {}
+        return {"distance_km": data.get("distance_km")}

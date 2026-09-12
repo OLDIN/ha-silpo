@@ -28,6 +28,9 @@
       },
       "courier_distance": {
         "name": "Silpo courier distance"
+      },
+      "courier_eta": {
+        "name": "Silpo courier ETA"
       }
     },
     "device_tracker": {

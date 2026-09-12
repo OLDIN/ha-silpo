@@ -43,3 +43,15 @@ def orders_delivery_envelope() -> dict:
 def auto_enable_custom_integrations(enable_custom_integrations):
     """Дозволити завантаження custom_components у тестах HA."""
     yield
+
+
+@pytest.fixture(autouse=True)
+def _mock_waze():
+    """Типово Waze недоступний у тестах (fallback на haversine).
+    Тести Waze-гілки перевизначають цей патч власним контекстом."""
+    from unittest.mock import AsyncMock, patch
+    with patch(
+        "custom_components.silpo.coordinator.async_get_route",
+        new=AsyncMock(return_value=None),
+    ):
+        yield

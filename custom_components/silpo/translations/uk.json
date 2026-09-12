@@ -33,6 +33,9 @@
       },
       "courier_distance": {
         "name": "Відстань кур'єра Silpo"
+      },
+      "courier_eta": {
+        "name": "Кур'єр Silpo — час прибуття"
       }
     },
     "device_tracker": {

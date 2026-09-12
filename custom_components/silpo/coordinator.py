@@ -17,6 +17,7 @@ from .const import (
     PROXIMITY_THRESHOLDS,
     STATUS_DELIVERY_IN_PROGRESS,
 )
+from .waze import async_get_route
 from .orders import (
     crossed_thresholds,
     detect_status_change,
@@ -78,8 +79,10 @@ class SilpoCoordinator(DataUpdateCoordinator):
         prev_id = self._prev_active.get("orderId") if self._prev_active else None
         active = select_tracked(orders, prev_id)
 
-        # відстань до кур'єра (лише під час доставки)
+        # відстань/ETA до кур'єра (лише під час доставки)
         distance = None
+        distance_km = None
+        eta_min = None
         location = None
         if active and active.get("status") == STATUS_DELIVERY_IN_PROGRESS:
             courier_id = (active.get("delivery") or {}).get("courierId")
@@ -87,10 +90,21 @@ class SilpoCoordinator(DataUpdateCoordinator):
             if courier_id and address.get("latitude"):
                 location = await self._client.async_get_courier_location(courier_id)
                 if location and location.get("latitude"):
-                    distance = haversine_m(
+                    # основне джерело — Waze (по дорогах + ETA)
+                    route = await async_get_route(
                         location["latitude"], location["longitude"],
                         address["latitude"], address["longitude"],
                     )
+                    if route:
+                        distance = route["distance_m"]
+                        distance_km = route["distance_km"]
+                        eta_min = route["duration_min"]
+                    else:
+                        # fallback: пряма відстань, якщо Waze недоступний
+                        distance = haversine_m(
+                            location["latitude"], location["longitude"],
+                            address["latitude"], address["longitude"],
+                        )
 
         # подія зміни статусу
         change = detect_status_change(self._prev_active, active)
@@ -113,4 +127,10 @@ class SilpoCoordinator(DataUpdateCoordinator):
 
         self._prev_active = active
         self._prev_distance = distance
-        return {"active": active, "distance_m": distance, "location": location}
+        return {
+            "active": active,
+            "distance_m": distance,
+            "distance_km": distance_km,
+            "eta_min": eta_min,
+            "location": location,
+        }

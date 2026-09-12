@@ -58,3 +58,28 @@ async def test_distance_sensor_not_on_map(hass, order_delivery, courier_location
     state = hass.states.get("sensor.silpo_courier_distance")
     assert "latitude" not in state.attributes
     assert "longitude" not in state.attributes
+
+
+async def test_eta_sensor_shows_minutes(hass, order_delivery, courier_location):
+    """sensor.silpo_courier_eta = хвилини до прибуття (з Waze), атрибут — км по дорогах."""
+    from unittest.mock import AsyncMock, patch
+    entry = MockConfigEntry(domain=DOMAIN, data=ENTRY_DATA, title="Silpo")
+    entry.add_to_hass(hass)
+    with patch(
+        "custom_components.silpo.SilpoClient.async_get_orders",
+        new=AsyncMock(return_value=[order_delivery]),
+    ), patch(
+        "custom_components.silpo.SilpoClient.async_get_courier_location",
+        new=AsyncMock(return_value=courier_location),
+    ), patch(
+        "custom_components.silpo.coordinator.async_get_route",
+        new=AsyncMock(return_value={"distance_km": 3.4, "distance_m": 3400, "duration_min": 13}),
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+    eta = hass.states.get("sensor.silpo_courier_eta")
+    assert eta is not None
+    assert eta.state == "13"
+    dist = hass.states.get("sensor.silpo_courier_distance")
+    assert dist.state == "3400"  # по дорогах, не по прямій
