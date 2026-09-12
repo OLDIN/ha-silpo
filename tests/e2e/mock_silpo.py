@@ -62,6 +62,26 @@ def build_app() -> web.Application:
         request.app["state"].location = {**request.app["state"].location, **body}
         return web.json_response({"ok": True})
 
+    async def auth_byphone(request: web.Request) -> web.Response:
+        return web.json_response({"nextStep": "LoginWithOTP", "error": None})
+
+    async def auth_otp(request: web.Request) -> web.Response:
+        return web.json_response({"nextStep": "Authenticated", "error": None})
+
+    async def auth_authorize(request: web.Request) -> web.Response:
+        # редірект на redirect_uri з фейковим code (як справжній OpenID)
+        redirect = request.query.get("redirect_uri", "https://id.silpo.ua/signin-oidc")
+        return web.HTTPFound(f"{redirect}?code=MOCKCODE&state={request.query.get('state','')}")
+
+    async def auth_token(request: web.Request) -> web.Response:
+        return web.json_response({
+            "access_token": "mock-access-token", "refresh_token": "mock-refresh-token",
+            "expires_in": 10800, "token_type": "Bearer"})
+
+    app.router.add_post("/api/v2/Login/ByPhone", auth_byphone)
+    app.router.add_post("/api/v2/Login/LoginWithOTP", auth_otp)
+    app.router.add_get("/connect/authorize", auth_authorize)
+    app.router.add_post("/connect/token", auth_token)
     app.router.add_get("/v3/store-front/orders", orders)
     app.router.add_get("/v1/couriers/{cid}/location", courier_location)
     app.router.add_post("/_test/set_status", set_status)
