@@ -121,3 +121,24 @@ async def test_reauth_flow_updates_tokens(hass):
     assert result["reason"] == "reauth_successful"
     assert entry.data["access_token"] == "fresh"
     assert entry.data["refresh_token"] == "freshr"
+
+
+async def test_options_flow_toggle_reauth_notify(hass):
+    """Опції: можна вимкнути сповіщення про повторний вхід."""
+    from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data={"phone": "+380500000000", "access_token": "t", "refresh_token": "r"},
+        options={}, title="Silpo",
+    )
+    entry.add_to_hass(hass)
+
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    assert result["step_id"] == "init"
+
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {"reauth_notify": False, "scan_interval": 30}
+    )
+    assert result["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
+    assert entry.options["reauth_notify"] is False

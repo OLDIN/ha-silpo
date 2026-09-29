@@ -60,10 +60,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         auth=auth, refresh_token=entry.data.get("refresh_token"), entry=entry,
     )
     await coordinator.async_config_entry_first_refresh()
+    from homeassistant.components import persistent_notification
+    persistent_notification.async_dismiss(hass, "silpo_reauth")
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+    entry.async_on_unload(entry.add_update_listener(_async_reload_entry))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
+
+
+async def _async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Перезавантажити інтеграцію при зміні опцій."""
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

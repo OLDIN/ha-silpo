@@ -161,3 +161,25 @@ async def test_coordinator_triggers_reauth_on_invalid_refresh(hass, order_collec
 
     with pytest.raises(ConfigEntryAuthFailed):
         await coordinator._async_update_data()
+
+
+async def test_auth_fail_creates_notification(hass, order_collected):
+    """При протуханні — створюється сповіщення для користувача (дзвіночок HA)."""
+    from unittest.mock import patch
+    from homeassistant.exceptions import ConfigEntryAuthFailed
+
+    class DeadAuth:
+        async def async_refresh(self, rt):
+            raise SilpoAuthError("invalid_grant")
+
+    client = FlakyClient(order_collected)
+    coordinator = SilpoCoordinator(
+        hass, client, options={}, auth=DeadAuth(), refresh_token="dead"
+    )
+
+    with patch(
+        "custom_components.silpo.coordinator.persistent_notification.async_create"
+    ) as mock_pn, pytest.raises(ConfigEntryAuthFailed):
+        await coordinator._async_update_data()
+
+    mock_pn.assert_called_once()

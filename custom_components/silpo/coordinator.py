@@ -4,13 +4,16 @@ from __future__ import annotations
 import logging
 from datetime import timedelta
 
+from homeassistant.components import persistent_notification
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .api import SilpoAuthError
 from .const import (
+    CONF_REAUTH_NOTIFY,
     CONF_SCAN_INTERVAL,
+    DEFAULT_REAUTH_NOTIFY,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     EVENT_COURIER_PROXIMITY,
@@ -47,6 +50,7 @@ class SilpoCoordinator(DataUpdateCoordinator):
         self._auth = auth
         self._refresh_token = refresh_token
         self._entry = entry
+        self._options = options
         self._prev_active: dict | None = None
         self._prev_distance: float | None = None
 
@@ -62,11 +66,26 @@ class SilpoCoordinator(DataUpdateCoordinator):
             except SilpoAuthError as refresh_err:
                 # refresh_token остаточно протух — потрібен новий OTP-логін.
                 # ConfigEntryAuthFailed зупиняє спам і вмикає reauth flow в HA.
+                self._notify_reauth()
                 raise ConfigEntryAuthFailed(str(refresh_err)) from refresh_err
             self._client.set_token(tokens["access_token"])
             self._refresh_token = tokens.get("refresh_token", self._refresh_token)
             self._persist_tokens(tokens)
             return await self._client.async_get_orders()
+
+    def _notify_reauth(self) -> None:
+        """Сповістити користувача, що потрібен повторний вхід (якщо не вимкнено)."""
+        if not self._options.get(CONF_REAUTH_NOTIFY, DEFAULT_REAUTH_NOTIFY):
+            return
+        persistent_notification.async_create(
+            self.hass,
+            "Сесія Сільпо завершилась (токен доступу протух). Відкрийте "
+            "Налаштування → Пристрої та служби → Silpo і натисніть «Налаштувати», "
+            "щоб увійти знову за кодом з SMS.\n\n"
+            "Вимкнути ці сповіщення: Silpo → Налаштувати → Параметри.",
+            title="Silpo: потрібен повторний вхід",
+            notification_id="silpo_reauth",
+        )
 
     def _persist_tokens(self, tokens: dict) -> None:
         """Зберегти оновлені токени у config entry (щоб пережити рестарт HA)."""

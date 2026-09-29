@@ -48,5 +48,16 @@
         "name": "Silpo courier"
       }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Silpo options",
+        "data": {
+          "reauth_notify": "Notify when re-login is needed",
+          "scan_interval": "Update interval (seconds)"
+        }
+      }
+    }
   }
 }

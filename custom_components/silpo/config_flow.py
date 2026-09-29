@@ -5,11 +5,23 @@ import logging
 from typing import Any
 
 import voluptuous as vol
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlow,
+)
+from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import SilpoAuth, SilpoAuthError, SilpoError
-from .const import DOMAIN
+from .const import (
+    CONF_REAUTH_NOTIFY,
+    CONF_SCAN_INTERVAL,
+    DEFAULT_REAUTH_NOTIFY,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -18,6 +30,11 @@ class SilpoConfigFlow(ConfigFlow, domain=DOMAIN):
     """Двокроковий OTP-флоу."""
 
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> "SilpoOptionsFlow":
+        return SilpoOptionsFlow()
 
     def __init__(self) -> None:
         self._auth: SilpoAuth | None = None
@@ -125,3 +142,24 @@ class SilpoConfigFlow(ConfigFlow, domain=DOMAIN):
             description_placeholders={"phone": self._phone or ""},
             errors=errors,
         )
+
+
+class SilpoOptionsFlow(OptionsFlow):
+    """Параметри інтеграції: інтервал опитування, сповіщення про повторний вхід."""
+
+    async def async_step_init(self, user_input=None) -> ConfigFlowResult:
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        opts = self.config_entry.options
+        schema = vol.Schema({
+            vol.Optional(
+                CONF_REAUTH_NOTIFY,
+                default=opts.get(CONF_REAUTH_NOTIFY, DEFAULT_REAUTH_NOTIFY),
+            ): bool,
+            vol.Optional(
+                CONF_SCAN_INTERVAL,
+                default=opts.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
+            ): int,
+        })
+        return self.async_show_form(step_id="init", data_schema=schema)
