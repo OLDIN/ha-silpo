@@ -14,6 +14,13 @@
         "data": {
           "code": "OTP код"
         }
+      },
+      "reauth_confirm": {
+        "title": "Повторний вхід Silpo",
+        "description": "Сесія Сільпо завершилась. На номер {phone} надіслано новий код — введіть його.",
+        "data": {
+          "code": "OTP код"
+        }
       }
     },
     "error": {
@@ -23,7 +30,8 @@
       "cannot_connect": "Не вдалося з'єднатися з Сільпо"
     },
     "abort": {
-      "already_configured": "Цей акаунт вже додано"
+      "already_configured": "Цей акаунт вже додано",
+      "reauth_successful": "Повторний вхід успішний"
     }
   },
   "entity": {

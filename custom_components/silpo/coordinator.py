@@ -5,6 +5,7 @@ import logging
 from datetime import timedelta
 
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .api import SilpoAuthError
@@ -53,10 +54,15 @@ class SilpoCoordinator(DataUpdateCoordinator):
         """Отримати замовлення; при протуханні токена — рефреш і повтор."""
         try:
             return await self._client.async_get_orders()
-        except SilpoAuthError:
+        except SilpoAuthError as err:
             if not self._auth or not self._refresh_token:
-                raise
-            tokens = await self._auth.async_refresh(self._refresh_token)
+                raise ConfigEntryAuthFailed(str(err)) from err
+            try:
+                tokens = await self._auth.async_refresh(self._refresh_token)
+            except SilpoAuthError as refresh_err:
+                # refresh_token остаточно протух — потрібен новий OTP-логін.
+                # ConfigEntryAuthFailed зупиняє спам і вмикає reauth flow в HA.
+                raise ConfigEntryAuthFailed(str(refresh_err)) from refresh_err
             self._client.set_token(tokens["access_token"])
             self._refresh_token = tokens.get("refresh_token", self._refresh_token)
             self._persist_tokens(tokens)

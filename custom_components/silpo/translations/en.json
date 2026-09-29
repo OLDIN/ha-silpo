@@ -12,6 +12,13 @@
         "data": {
           "code": "OTP code"
         }
+      },
+      "reauth_confirm": {
+        "title": "Silpo re-authentication",
+        "description": "Silpo session expired. A new code was sent to {phone} — enter it.",
+        "data": {
+          "code": "OTP code"
+        }
       }
     },
     "error": {
@@ -19,6 +26,9 @@
       "invalid_code": "Code must be 6 digits",
       "invalid_auth": "Invalid or expired code",
       "cannot_connect": "Cannot connect to Silpo"
+    },
+    "abort": {
+      "reauth_successful": "Re-authentication successful"
     }
   },
   "entity": {

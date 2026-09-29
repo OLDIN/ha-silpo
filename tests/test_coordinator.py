@@ -143,3 +143,21 @@ async def test_coordinator_uses_waze_route(hass, order_delivery, courier_locatio
     assert data["distance_m"] == 3400
     assert data["eta_min"] == 13
     assert data["distance_km"] == 3.4
+
+
+async def test_coordinator_triggers_reauth_on_invalid_refresh(hass, order_collected):
+    """Коли refresh_token остаточно протух (invalid_grant) -> ConfigEntryAuthFailed
+    (HA покаже reauth і припинить спам помилками)."""
+    from homeassistant.exceptions import ConfigEntryAuthFailed
+
+    class DeadAuth:
+        async def async_refresh(self, rt):
+            raise SilpoAuthError("Refresh не вдався: invalid_grant")
+
+    client = FlakyClient(order_collected)  # перший get_orders -> 401
+    coordinator = SilpoCoordinator(
+        hass, client, options={}, auth=DeadAuth(), refresh_token="dead"
+    )
+
+    with pytest.raises(ConfigEntryAuthFailed):
+        await coordinator._async_update_data()
