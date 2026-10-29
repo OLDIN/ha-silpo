@@ -103,19 +103,35 @@ class SilpoConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_reauth_confirm(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Надіслати SMS на збережений номер і прийняти новий код."""
-        errors: dict[str, str] = {}
-        session = async_get_clientsession(self.hass)
-        if self._auth is None:
-            self._auth = SilpoAuth(session)
+        """Confirm re-auth; the SMS is sent ONLY after the user submits.
 
-        if user_input is None:
-            # перший показ форми — одразу надсилаємо SMS на відомий номер
+        HA starts the reauth flow automatically (on every restart / failed
+        setup), so sending the SMS on the first form render would spam the user.
+        """
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            if self._auth is None:
+                self._auth = SilpoAuth(async_get_clientsession(self.hass))
             try:
                 await self._auth.async_request_otp(self._phone)
             except (ValueError, SilpoError):
                 errors["base"] = "cannot_connect"
-        else:
+            else:
+                return await self.async_step_reauth_otp()
+
+        return self.async_show_form(
+            step_id="reauth_confirm",
+            data_schema=vol.Schema({}),
+            description_placeholders={"phone": self._phone or ""},
+            errors=errors,
+        )
+
+    async def async_step_reauth_otp(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Enter the SMS code during re-authentication."""
+        errors: dict[str, str] = {}
+        if user_input is not None:
             try:
                 tokens = await self._auth.async_verify_otp(user_input["code"])
             except ValueError:
@@ -123,13 +139,9 @@ class SilpoConfigFlow(ConfigFlow, domain=DOMAIN):
             except SilpoAuthError:
                 errors["base"] = "invalid_auth"
             else:
-                entry = self.hass.config_entries.async_get_entry(
-                    self.context["entry_id"]
-                )
                 return self.async_update_reload_and_abort(
-                    entry,
-                    data={
-                        **entry.data,
+                    self._get_reauth_entry(),
+                    data_updates={
                         "access_token": tokens["access_token"],
                         "refresh_token": tokens.get("refresh_token"),
                         "expires_in": tokens.get("expires_in"),
@@ -137,7 +149,7 @@ class SilpoConfigFlow(ConfigFlow, domain=DOMAIN):
                 )
 
         return self.async_show_form(
-            step_id="reauth_confirm",
+            step_id="reauth_otp",
             data_schema=vol.Schema({vol.Required("code"): str}),
             description_placeholders={"phone": self._phone or ""},
             errors=errors,

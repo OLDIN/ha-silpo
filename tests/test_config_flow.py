@@ -101,12 +101,18 @@ async def test_reauth_flow_updates_tokens(hass):
     )
     entry.add_to_hass(hass)
 
+    otp_mock = AsyncMock(return_value={"nextStep": "LoginWithOTP"})
     with patch(
         "custom_components.silpo.config_flow.SilpoAuth.async_request_otp",
-        new=AsyncMock(return_value={"nextStep": "LoginWithOTP"}),
+        new=otp_mock,
     ):
         result = await entry.start_reauth_flow(hass)
-    assert result["step_id"] == "reauth_confirm"
+        assert result["step_id"] == "reauth_confirm"
+        # The SMS must NOT be sent automatically when the reauth flow is created
+        assert otp_mock.await_count == 0
+        result = await hass.config_entries.flow.async_configure(result["flow_id"], {})
+        assert otp_mock.await_count == 1
+    assert result["step_id"] == "reauth_otp"
 
     with patch(
         "custom_components.silpo.config_flow.SilpoAuth.async_verify_otp",

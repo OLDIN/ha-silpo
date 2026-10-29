@@ -15,7 +15,11 @@
       },
       "reauth_confirm": {
         "title": "Silpo re-authentication",
-        "description": "Silpo session expired. A new code was sent to {phone} — enter it.",
+        "description": "Your Silpo session has expired. Press Submit to receive an SMS code at {phone}."
+      },
+      "reauth_otp": {
+        "title": "SMS code",
+        "description": "Enter the 6-digit code sent to {phone}.",
         "data": {
           "code": "OTP code"
         }
