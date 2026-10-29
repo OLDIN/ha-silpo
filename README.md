@@ -334,6 +334,25 @@ scripts/dev_ha_ui.sh down                          # зупинити
 
 ---
 
+## Releases
+
+Releases follow [semantic versioning](https://semver.org/); the version lives in `custom_components/silpo/manifest.json`, and HACS offers an update whenever a new GitHub Release appears.
+
+```bash
+# Bump the version, write RELEASE_NOTES_X.Y.Z.md, commit, push a branch and open a PR
+python scripts/bump_version.py patch --pr      # or minor / major
+
+# After the merge, .github/workflows/release.yml sees the new version in
+# manifest.json, creates tag vX.Y.Z and publishes the GitHub Release.
+
+# Manual fallback if the workflow did not run:
+python scripts/bump_version.py release
+```
+
+Both commands accept `-d/--dry-run`. Pushing a version bump straight to `main` also triggers the Release workflow.
+
+---
+
 ## Плани
 
 - 📦 **Черга** — скільки замовлень попереду вашого. Наразі доступна лише в мобільному

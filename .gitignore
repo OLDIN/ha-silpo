@@ -28,3 +28,9 @@ config/.uuid
 
 # локальний runtime HA (токени, паролі, .storage) — НІКОЛИ в git
 ha_config/
+
+# macOS
+.DS_Store
+
+# scratch
+_to_delete/
